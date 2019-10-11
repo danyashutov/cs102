@@ -9,11 +9,9 @@ def encrypt_caesar(plaintext: str) -> str:
     print(plaintext)
     return plaintext
 
-
 encrypt_caesar("PYTHON")
 encrypt_caesar("python")
 encrypt_caesar("Python3.6")
-
 
 def decrypt_caesar(ciphertext: str) -> str:
     for i in ciphertext:
