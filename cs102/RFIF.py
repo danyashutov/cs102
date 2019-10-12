@@ -1,15 +1,4 @@
-def encrypt_vigenere(plaintext: str, keyword: str) -> str:
-    """
-    Encrypts plaintext using a Vigenere cipher.
-
-    >>> encrypt_vigenere("PYTHON", "A")
-    'PYTHON'
-    >>> encrypt_vigenere("python", "a")
-    'python'
-    >>> encrypt_vigenere("ATTACKATDAWN", "LEMON")
-    'LXFOPVEFRNHR'
-    """
-    # PUT YOUR CODE HERE
+def encrypt_vigenere(plaintext, keyword) ->str:
     ciphertext = ''
     i = 0;
     for ch in plaintext:
@@ -31,18 +20,7 @@ def encrypt_vigenere(plaintext: str, keyword: str) -> str:
         i = 1 + i
     return ciphertext
 
-
-def decrypt_vigenere(ciphertext, keyword):
-    """
-    Decrypts a ciphertext using a Vigenere cipher.
-    >>> decrypt_vigenere("PYTHON", "A")
-    'PYTHON'
-    >>> decrypt_vigenere("python", "a")
-    'python'
-    >>> decrypt_vigenere("LXFOPVEFRNHR", "LEMON")
-    'ATTACKATDAWN'
-    """
-    # PUT YOUR CODE HERE
+def decrypt_vigenere(ciphertext, keyword) ->str:
     plaintext = ''
     i = 0;
     for ch in ciphertext:
@@ -63,10 +41,9 @@ def decrypt_vigenere(ciphertext, keyword):
         i = 1 + i
     return plaintext
 
+plaintext=str(input('Your message: '))
+keyword=str(input('Keywordd: '))
 
-plaintext = str(input('Your message: '))
-keyword = str(input('Keywordd: '))
-
-ciphertext = encrypt_vigenere(plaintext, keyword)
+ciphertext = encrypt_vigenere(plaintext,keyword)
 print("Cod: " + ciphertext)
-print("Not Cod: " + decrypt_vigenere(ciphertext, keyword))
+print("Not Cod: " + decrypt_vigenere(ciphertext,keyword))
