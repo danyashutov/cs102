@@ -1,4 +1,6 @@
 import curses
+import time
+import argparse
 
 from life import GameOfLife
 from ui import UI
@@ -11,28 +13,43 @@ class Console(UI):
 
     def draw_borders(self, screen) -> None:
         """ Отобразить рамку. """
-        screen.addstr(0, 0, '+' + ''.join(['-' for _ in range(self.life.cols)]) + '+')
-        for i in range(self.life.rows):
-            screen.addch(i + 1, 0, '|')
-            screen.addch(i + 1, self.life.cols + 1, '|')
-        screen.addstr(self.life.rows + 1, 0, '+' + ''.join(['-' for _ in range(self.life.cols)]) + '+')
+        screen.border(0)
 
     def draw_grid(self, screen) -> None:
         """ Отобразить состояние клеток. """
-        for i in range(self.life.rows):
-            for j in range(self.life.cols):
-                if self.life.curr_generation[i][j]:
-                    screen.addch(i + 1, j + 1, '*')
-                else:
-                    screen.addch(i + 1, j + 1, ' ')
+        for row_ind, row in enumerate(self.life.curr_generation):
+            for col_ind, cell in enumerate(row):
+                if cell != 0:
+                    try:
+                        screen.addstr(row_ind + 1, col_ind + 1, '*')
+                    except Exception as e:
+                        print(row_ind, col_ind)
 
     def run(self) -> None:
         screen = curses.initscr()
-        screen.clear()
-        self.draw_borders(screen)
-        screen.refresh()
-        while not self.life.is_max_generations_exceeded and self.life.is_changing:
+        curses.curs_set(0)
+
+        running = True
+        while running:
+            screen.clear()
+            self.draw_borders(screen)
             self.draw_grid(screen)
-            screen.refresh()
             self.life.step()
+            if self.life.is_max_generations_exceed:
+                running = False
+            screen.refresh()
+            time.sleep(1 / 60)
+
+        screen.getch()
         curses.endwin()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Console Game of life')
+    parser.add_argument('--rows', type=int, default=80, help='Number of rows')
+    parser.add_argument('--cols', type=int, default=30, help='Number of columns')
+    parser.add_argument('--max-generations', default=float('inf'), type=int, help='Maximum generation count')
+    args = parser.parse_args()
+    game = GameOfLife((args.cols, args.rows), max_generations=args.max_generations)
+    console = Console(game)
+    console.run()

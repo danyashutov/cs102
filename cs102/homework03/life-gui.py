@@ -1,4 +1,5 @@
 import pygame
+import argparse
 from pygame.locals import *
 
 from life import GameOfLife
@@ -7,16 +8,17 @@ from ui import UI
 
 class GUI(UI):
 
-    def __init__(self, life: GameOfLife, cell_size: int=10, speed: int=10) -> None:
+    def __init__(self, life: GameOfLife, cell_size: int = 10, speed: int = 10) -> None:
         super().__init__(life)
         self.cell_size = cell_size
+        self.speed = speed
+
         self.width = self.life.cols * cell_size
         self.height = self.life.rows * cell_size
-        self.screen_size = self.width, self.height
-        self.screen = pygame.display.set_mode(self.screen_size)
-        self.speed = speed
+        self.screen = pygame.display.set_mode((self.width, self.height))
+
     def draw_lines(self) -> None:
-        # Copy from previous assignment
+        """ Отрисовать сетку """
         for x in range(0, self.width, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color('black'),
                              (x, 0), (x, self.height))
@@ -25,15 +27,17 @@ class GUI(UI):
                              (0, y), (self.width, y))
 
     def draw_grid(self) -> None:
-        # Copy from previous assignment
-        for i in range(self.life.rows):
-            for j in range(self.life.cols):
-                if self.life.curr_generation[i][j]:
-                    col = pygame.Color('green')
-                else:
-                    col = pygame.Color('white')
-                pygame.draw.rect(self.screen, col, (
-                j * self.cell_size + 1, i * self.cell_size + 1, self.cell_size - 1, self.cell_size - 1))
+        """
+        Отрисовка списка клеток с закрашиванием их в соответствующе цвета.
+        """
+        for y in range(self.life.rows):
+            for x in range(self.life.cols):
+                if self.life.curr_generation[y][x]:
+                    pygame.draw.rect(self.screen, pygame.Color('green'), (
+                        x * self.cell_size + 1, y * self.cell_size + 1, self.cell_size - 1, self.cell_size - 1))
+
+    def get_cell(self, x: int, y: int):
+        return x // self.cell_size, y // self.cell_size
 
     def run(self) -> None:
         # Copy from previous assignment
@@ -41,41 +45,46 @@ class GUI(UI):
         clock = pygame.time.Clock()
         pygame.display.set_caption('Game of Life')
         self.screen.fill(pygame.Color('white'))
+
+        paused = False
         running = True
-        paused = True
         while running:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                    # при нажатии ПКМ игра ставится на паузу
-                    paused = True
+                if event.type == KEYDOWN:
+                    if event.key == K_SPACE:
+                        paused = not paused
+                if event.type == MOUSEBUTTONDOWN:
+                    if paused:
+                        x, y = self.get_cell(*pygame.mouse.get_pos())
+                        self.life.curr_generation[y][x] = abs(self.life.curr_generation[y][x] - 1)
 
+            self.screen.fill(pygame.Color('white'))
             self.draw_lines()
             self.draw_grid()
+            # Отрисовка списка клеток
+            # Выполнение одного шага игры (обновление состояния ячеек)
+            if paused:
+                pass
+            else:
+                if not self.life.is_max_generations_exceed:
+                    self.life.step()
+                else:
+                    pygame.display.set_caption('Game of Life | Generations limit exceed')
             pygame.display.flip()
-
-            while paused:
-                for event in pygame.event.get():
-                    if event.type == QUIT:
-                        running = False
-                        paused = False
-                    elif event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 1:
-                            # при нажатии ЛКМ на клетку ее состояние меняется
-                            click_pos = pygame.mouse.get_pos()
-                            x = click_pos[0] // self.cell_size
-                            y = click_pos[1] // self.cell_size
-                            self.life.curr_generation[y][x] = (self.life.curr_generation[y][x] + 1) % 2
-                            self.draw_lines()
-                            self.draw_grid()
-                            pygame.display.flip()
-                        elif event.button == 3:
-                            # при нажатии ПКМ игра снимается с паузы
-                            paused = False
-
-            self.life.step()
-            if self.life.is_max_generations_exceeded or not self.life.is_changing:
-                running = False
             clock.tick(self.speed)
         pygame.quit()
+
+
+"""if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Console Game of life')
+    parser.add_argument('--width', type=int, default=640, help='Screen width, px')
+    parser.add_argument('--height', type=int, default=480, help='Screen height, px')
+    parser.add_argument('--cell-size', type=int, default=10, help='Cell size, px')
+    parser.add_argument('--max-generations', type=int, default=float('inf'), help='Maximum generation count')
+    args = parser.parse_args()
+    game = GameOfLife((args.height // args.cell_size, args.width // args.cell_size),
+                      max_generations=args.max_generations)
+    gui = GUI(game)
+    gui.run()"""
