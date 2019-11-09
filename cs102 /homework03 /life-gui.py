@@ -75,16 +75,3 @@ class GUI(UI):
             pygame.display.flip()
             clock.tick(self.speed)
         pygame.quit()
-
-
-"""if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Console Game of life')
-    parser.add_argument('--width', type=int, default=640, help='Screen width, px')
-    parser.add_argument('--height', type=int, default=480, help='Screen height, px')
-    parser.add_argument('--cell-size', type=int, default=10, help='Cell size, px')
-    parser.add_argument('--max-generations', type=int, default=float('inf'), help='Maximum generation count')
-    args = parser.parse_args()
-    game = GameOfLife((args.height // args.cell_size, args.width // args.cell_size),
-                      max_generations=args.max_generations)
-    gui = GUI(game)
-    gui.run()"""
