@@ -24,7 +24,7 @@ Base.metadata.create_all(bind=engine)
 
 s = session()
 def transfer():
-    for i in get_news('https://news.ycombinator.com/', 15):
+    for i in get_news('https://news.ycombinator.com/', 10):
         news = News(title = i['title'],
                     author = i['author'],
                     url = i["url"],
@@ -32,4 +32,3 @@ def transfer():
                     points = i['points'])
         s.add(news)
         s.commit()
-

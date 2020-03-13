@@ -1,11 +1,11 @@
 from bottle import (
     route, run, template, request, redirect
 )
-from sqlalchemy.testing import db
-from cs102.homework06.bayes import NaiveBayesClassifier
+from cs102.homework06.bayes import NaiveBayesClassifier, clean
 from cs102.homework06.scraputils import get_news
 from cs102.homework06.db import News, session
 import bottle
+
 @bottle.route('/')
 @route("/news")
 def news_list():
@@ -16,6 +16,7 @@ def news_list():
 
 @route("/add_label/")
 def add_label():
+
     s = session()
     id = request.query.id
     label = request.query.label
@@ -27,9 +28,10 @@ def add_label():
 
 @route("/update")
 def update_news():
+
     s = session()
     base = s.query(News).all()
-    new_news = get_news('https://news.ycombinator.com/newest', 34)
+    new_news = get_news('https://news.ycombinator.com/', 5)
     for i in new_news:
         for j in base:
             if (i['title'] == j.title) and (i['author'] == j.author):
@@ -44,11 +46,27 @@ def update_news():
                 s.commit()
     redirect("/news")
 
-
 @route("/classify")
 def classify_news():
-    # PUT YOUR CODE HERE
-    redirect("/news")
+
+    s = session()
+    none_news = []
+    rows = s.query(News).filter(News.label == None).all()
+    learn_news = s.query(News).filter(News.label != None).all()
+    X_train, y_train = [], []
+    for news in learn_news:
+        X_train.append(news.title)
+        y_train.append(news.label)
+    X_train = [clean(x).lower() for x in X_train]
+    model = NaiveBayesClassifier(alpha=1)
+    model.fit(X_train, y_train)
+    for news in rows:
+        none_news.append(news.title)
+    predict_labels = model.predict(none_news)
+    for news, label in zip(rows, predict_labels):
+        news.label = label
+    classified_news = sorted(rows, key=lambda news: news.label)
+    return template('./news_recommendations.tpl', rows=classified_news)
 
 
 if __name__ == "__main__":
