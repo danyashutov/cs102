@@ -74,7 +74,7 @@ class NaiveBayesClassifier:
         return accuracy
 
 
-with open("SMSSpamCollection.txt") as f:
+with open("SMSSpamCollection.txt", encoding='utf-8') as f:
     data = list(csv.reader(f, delimiter="\t"))
 
 
@@ -93,5 +93,3 @@ def test():
     model = NaiveBayesClassifier()
     model.fit(X_train, y_train)
     print(model.score(X_test, y_test))
-
-test()
